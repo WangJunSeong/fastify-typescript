@@ -2,28 +2,39 @@ import dotenv from 'dotenv';
 import * as path from 'path';
 import Fastify from 'fastify';
 import _ from 'lodash';
+import FastifyMiddleware from './middleware';
+import FastifyHooks from './hooks';
+import FastifyContentTypeParser from './parser';
+import FastifyRotuer from './routes';
 
-const envFilepath = process.env.NODE_ENT == 'production'
-   ? path.join(__dirname, '../env/.env.production')
-   : path.join(__dirname, '../env/.env.development');            
+const envFilePath = process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, '../env/.env.production')
+    : path.join(__dirname, '../env/.env.development');
 
-   dotenv.config({
-    path: envFilepath
-   });
+dotenv.config({
+    path: envFilePath
+});
 
-   const fastify = Fastify({
-        logger: Boolean(process.env.FASTIFY_LOGGING || true)
-    });
+const fastity = Fastify({
+    logger: Boolean(process.env.FASTIFY_LOGGING || true)
+});
 
-    fastify.listen({
-        port: _.toNumber(process.env.SERVER_PORT || 9000),
-        host: '0.0.0.0'
-    }, (err, addr) => {
-        if (err) {
-            fastify.log.error(err);
-            process.exit(1);
-        }
+fastity.register(FastifyMiddleware);
 
-        console.info(`server Listening at ${addr}`);
+fastity.register(FastifyContentTypeParser);
 
-    });
+fastity.register(FastifyHooks);
+
+fastity.register(FastifyRotuer);
+
+fastity.listen({
+    port: _.toNumber(process.env.SERVER_PORT || 9000),
+    host: '0.0.0.0'
+}, (err, addr) => {
+    if (err) {
+        fastity.log.error(err);
+        process.exit(1);
+    }
+
+    console.info(`server listening at ${addr} 🐱`);
+});
